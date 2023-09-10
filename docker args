@@ -1,0 +1,27 @@
+docker run ubuntu [Command] ===> docker run ubuntu sleep 5
+
+OR in dockerfile
+
+"
+FROM Ubuntu
+CMD sleep5 or CMD ["sleep" "5"]
+"
+
+CMD is used to specify the command and the parameters in the docker startup. so above container sleeps for 5 sec.
+
+If we want to control the command and let user specify the parameter, then use entrypoint
+
+"
+FROM Ubuntu
+ENTRYPOINT ["sleep"]
+"
+
+docker run ubuntu 10, will fire the sleep 10 command for the above image. it appends 10 to the sleep.
+
+"
+FROM Ubuntu
+ENTRYPOINT ["sleep"]
+CMD ["5"]
+"
+
+docker run ubuntu will not fire sleep 5, however docker run ubunutu 10, will fire sleep 10. that means cmd will be overriden by 10. if we want to override the entrypoint then it should be docker run --entrypoint=sleep2.0 ubunutu 10. this will override both

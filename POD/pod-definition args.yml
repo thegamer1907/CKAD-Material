@@ -4,9 +4,87 @@ metadata:
   name: myapp-pod
   labels:
     app: myapp
+  annotations:
+    buildVersion: 1.34
 spec:
+  securityContext: ## this is at pod level. its passed down to all containers. no capabilities here
+    runAsUser: 1000
+  serviceAccountName: my-svc-acc ##this will mount the service account to the pod and inject the token in the volume 
+  restartPolicy: Always ## could be Never, OnFailure
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: size
+            operator: In ## could be "NotIn" or Exists as well
+            values:
+            - Large
+            - Medium
+  nodeSelector:
+    size: Large ##Need to label the nodes with this key/value pair before creating the pod
+  tolerations:
+  - key: "app"
+    operator: "Equal"
+    value: "blue"
+    effect: "NoSchedule"
   containers:
-    - name: ubuntu-sleeper
-      image: ubuntu-sleeper
-      command: ["sleep2.0"] ##this overrides the entrypoint in the docker file of the image
-      args: ["10"]  ##this overrides the cmd filed
+  - name: ubuntu-sleeper
+    image: ubuntu-sleeper
+    command: ["sleep2.0"] ##this overrides the entrypoint in the docker file of the image
+    args: ["10"]  ##this overrides the cmd filed
+    securityContext: ## this is at container level, if both are provided the container overrides the pod
+      runAsUser: 1000
+      capabilities:
+        add: ["MAC_ADMIN"]
+    livenessProbe:
+      initialDelaySeconds: 10 ## after what delay should probe execute
+      periodSeconds: 5 ## interval of probe execution
+      failureThreshold: 8 ## how many times probe should fail to declare pod dead (default is 3)
+      httpGet:
+        path: /api/ready
+        port: 8000
+      tcpSocket:
+        port: 8806
+      exec:
+        command:
+          - cat
+          - /app/fs/ready
+    readinessProbe:
+      initialDelaySeconds: 10 ## after what delay should probe execute
+      periodSeconds: 5 ## interval of probe execution
+      failureThreshold: 8 ## how many times probe should fail to declare pod dead (default is 3)
+      httpGet:
+        path: /api/ready
+        port: 8000
+      tcpSocket:
+        port: 8806
+      exec:
+        command:
+          - cat
+          - /app/fs/ready
+    env:
+      - name: APP_COLOR
+        value: pink
+      - name: APP_COLOR ##load single value from configmap
+        valueFrom:
+          configMapKeyRef:
+            name: app-config
+            key: APP_COLOR
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: app-secret
+            key: DB_PASSWORD
+    envFrom: ##load the entire config
+      - configMapRef:
+          name: app-config
+      - secretRef:
+          name: app-secret
+    resources:
+      requests:
+        memory: "4Gi"
+        cpu: 2 ##min value 0.1
+      limits:
+        memory: "2Gi"
+        cpu: 2

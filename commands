@@ -17,6 +17,8 @@ kubectl get pod <pod-name> -o yaml > pod-definition.yaml
 
 kubectl run nginx --image=nginx --dry-run=client -o yaml
 
+kubectl get pods --selector app=app1
+
 
 ##### ReplicaSet #####
 
@@ -40,12 +42,56 @@ kubectl config set-context $(kubectl config current-context) --namespace=dev
 
 ##### Deployments #####
 
-
 kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deploy.yaml
 
 kubectl create deployment nginx --image=nginx --replicas=4 --dry-run=client -o yaml > nginx-deployment.yaml
 
+kubectl rollout status deployment <deployment-name>
+
+kubectl rollout history deployment <deployment-name>
+
+kubectl rollout undo deployment <deployment-name> --to-revision=1 ==> if you want to go to specific revision
 
 ##### Service #####
 
 kubectl expose pod redis --port=6379 --name redis-service
+
+
+##### ConfigMap and Secrets #####
+
+kubectl create configmap <name> --from-literal=KEY=value --from-literal=Key2-value2
+
+kubectl create configmap <name> --from-file=<path-to-file>
+
+kubectl describe configmaps
+
+kubectl create secret <name> --from-literal=key=value
+
+echo -n 'mysql' | base64
+
+echo -n 'asdasd' | base64 --decode
+
+
+##### ServiceAccounts #####
+
+kubectl create serviceaccount <name> ==> Generates a token as a secret object (doesnt generate anymore in 1.24)
+
+kubectl create token <service-account-name> ==> this generates the token now in 1.24
+
+##### Taints and Tolerations #####
+
+kubectl taint nodes <node-name> key=value:taint-effect ===> taint-effect defines what will happen to pods who do not tolerate the taint. There are 3 types. Put a "-" at the end to untaint the node
+
+1. NoSchedule - no new pods will be scheduled if they dont tolerate
+2. PreferNoSchedule - k8 will try not to schedule new pods but not garunteed
+3. NoExecute - All pods that dont tolerate will be evicted from the node even if they were created before the taint. no new schedules also
+
+
+##### Node Selectors and Node Affinity #####
+
+kubectl label nodes <node-name> key=value
+
+##### Metrics Server #####
+
+kubectl top node
+kuectl top pod

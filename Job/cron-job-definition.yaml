@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: Cron-job
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: math-add-job
+              image: ubuntu
+              command: ['sleep', '30']
+  schedule: "*/1 * * * *"

@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - "Ingress"
+  - "Egress"
+  ingress:
+    - from: ##Here pod and namespace selector work like and condition, moreover ipblock is or. basically its or between array elements
+        - podSelector:
+            matchLabels:
+              name: api-pod
+          namespaceSelector: ## if you also want to restrict the namespace
+            matchLabels:
+              name: prod
+        - ipBlock:
+            cidr: 192.168.5.10/32 ## if you need to allow traffic from some external souce outside k8
+      ports:
+        - protocol: TCP
+          port: 3306
+  egress:
+    - to:
+      - ipBlock:
+          cidr: 192.168.5.10/32
+      ports:
+        - protocol: TCP
+          port: 80
+  

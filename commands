@@ -95,3 +95,17 @@ kubectl label nodes <node-name> key=value
 
 kubectl top node
 kuectl top pod
+
+
+##### Services #####
+
+NodePort -- maps a port on the node to a port on the pods. spans across nodes and pods of the same labels
+ClusterIP -- creates a virtual IP to enable communication with different pods
+Loadbalancer -- the main difference between this and nodeport is that nodeport exposes the pods on each nods's url but loadbalancer provides a single url to access pods across nodes in the cluster
+Ingress -- traffic incoming to a process
+Egress -- outgoing traffic from a process
+
+
+##### Ingress #####
+
+kubectl create ingress <ingress-name> --rule="host/path=service:port"

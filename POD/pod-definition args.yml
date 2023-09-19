@@ -7,6 +7,14 @@ metadata:
   annotations:
     buildVersion: 1.34
 spec:
+  volume:
+  - name: data-volume
+    hostPath:
+      path: /data
+      type: Directory
+  - name: pv-claim
+    persistentVolumeClaim:
+      claimName: myclaim
   securityContext: ## this is at pod level. its passed down to all containers. no capabilities here
     runAsUser: 1000
   serviceAccountName: my-svc-acc ##this will mount the service account to the pod and inject the token in the volume 
@@ -33,6 +41,9 @@ spec:
     image: ubuntu-sleeper
     command: ["sleep2.0"] ##this overrides the entrypoint in the docker file of the image
     args: ["10"]  ##this overrides the cmd filed
+    volumeMounts:
+    - mountPath: /test-pd
+      name: data-volume
     securityContext: ## this is at container level, if both are provided the container overrides the pod
       runAsUser: 1000
       capabilities:

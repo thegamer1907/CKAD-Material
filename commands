@@ -109,3 +109,35 @@ Egress -- outgoing traffic from a process
 ##### Ingress #####
 
 kubectl create ingress <ingress-name> --rule="host/path=service:port"
+
+##### Volumes #####
+
+docker run -v data_volume:/var/lib/mysql mysql ==> This is volume mount
+docker run -v /data/mysql:/var/lib/mysql mysql ==> This is bind mount(mount any folder on the container)
+
+docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql ==> this is the new command(more verbose)
+
+#### Authentication ####
+
+kube-apiserver can be protected by several mechanisms
+1. static file - give csv with user details
+
+kubectl config use-context <context-name>
+kubectl config --kubeconfig=/root/my-kube-config use-context research
+
+kubectl auth can-i create deployments ==> to check authorization
+
+kubectl auth can-i create deployments --as dev-user ==> impersonate a user and check auth
+
+#### Admission COntroller ####
+
+Enforce things such as pod image, root user etc. doesnt work with auth alone. need admission clusters for that
+
+1. AlwaysPullImages
+2. DefaultStorageClass
+3. NamespaceExists
+4. NamespaceAutoProvision
+To add a controller kubeapiserver command should be modified
+kubeapiserver -h | grep enable-admission-plugins
+ps -ef | grep kube-apiserver | grep admission-plugins
+/etc/kubernetes/manifests/kube-apiserver.yaml - file to edit for kubeapiserver

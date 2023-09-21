@@ -71,6 +71,10 @@ echo -n 'mysql' | base64
 
 echo -n 'asdasd' | base64 --decode
 
+kubectl -n webhook-demo create secret tls webhook-server-tls \
+    --cert "/root/keys/webhook-server-tls.crt" \
+    --key "/root/keys/webhook-server-tls.key" ==> TLS type secret
+
 
 ##### ServiceAccounts #####
 
@@ -129,9 +133,10 @@ kubectl auth can-i create deployments ==> to check authorization
 
 kubectl auth can-i create deployments --as dev-user ==> impersonate a user and check auth
 
-#### Admission COntroller ####
+#### Admission Controller ####
 
-Enforce things such as pod image, root user etc. doesnt work with auth alone. need admission clusters for that
+Enforce things such as pod image, root user etc. doesnt work with auth alone. need admission clusters for that.
+2 types of it validating(only validates) and mutating(can change the object, happens before validating)
 
 1. AlwaysPullImages
 2. DefaultStorageClass
@@ -141,3 +146,30 @@ To add a controller kubeapiserver command should be modified
 kubeapiserver -h | grep enable-admission-plugins
 ps -ef | grep kube-apiserver | grep admission-plugins
 /etc/kubernetes/manifests/kube-apiserver.yaml - file to edit for kubeapiserver
+
+we can write our own controllers
+
+1. MutatingAdmissionWebhook
+2. ValidatingAdmissionWebhook
+
+Deploy a webhook server, which accepts a object containing all details of the operation and returns a response which 
+determines if the operation is allowed or not.
+
+
+#### Helm ####
+
+cat /etc/*release* ==> to check for the os
+helm search hub/repo <package>
+
+helm repo add <repo-name> <repo-url>
+
+helm install [release-name] [chart-name]
+
+helm list
+
+helm uninstall [release-name]
+
+helm pull --untar bitnami/wordpress
+
+helm install [release-name] [release-folder]
+

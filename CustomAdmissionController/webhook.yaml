@@ -1,0 +1,20 @@
+apiVersion: addmisionregisteration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-ex
+webhooks:
+  - clientConfig:
+      url: https://validate.com ##if the webhookk server is outside k8, then simply give the url or give service details if its in k8
+      service:
+        name: webhook-service
+        namespace: webhook-namespace
+      caBundle: "certificate data"
+    name: "pod-policy.example.com"
+    admissionReviewVersions:
+      - "v1"
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - "v1"
